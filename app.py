@@ -508,7 +508,7 @@ def generate_validation_patterns(first_name, last_name, domain):
 # STREAMLIT APP
 # =============================================================================
 
-st.set_page_config(page_title="Email Permutation Generator", page_icon="✉️", layout="wide")
+st.set_page_config(page_title="Email Permutation Generator | Felix M. Salve", page_icon="✉️", layout="wide")
 
 REQUIRED = ["First Name", "Last Name", "Email", "Domain"]
 OUTPUT_COLS = REQUIRED + ["New Email"]
@@ -595,20 +595,222 @@ def build_output(df, mapping, mode, token_min_len, row_budget, token_mode, drop_
     return out, pd.DataFrame(skipped, columns=REQUIRED)
 
 
+# =============================================================================
+# PRESENTATION (styling + reusable UI blocks)
+# =============================================================================
+BRAND = "Felix M. Salve"
+LINKEDIN = "https://www.linkedin.com/in/felixsalve/"
+
+CSS = """
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;600&display=swap');
+:root{
+  --bg:#0B1220; --panel:#121B30; --panel-2:#1A2644; --line:#26335A;
+  --text:#E8EEF9; --muted:#93A3C4; --signal:#38BDF8; --on-signal:#04121F; --stamp:#E8962A;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#F3F6FB; --panel:#FFFFFF; --panel-2:#EAF0FA; --line:#D6DFEE;
+         --text:#0F1B33; --muted:#57688A; --signal:#0369A1; --on-signal:#FFFFFF; }
+}
+html, body, .stApp { background: var(--bg) !important; color: var(--text); }
+.stApp, .stApp p, .stApp label, .stApp li, .stApp button, .stApp input, .stApp textarea,
+.stApp [data-testid="stMarkdownContainer"] { font-family: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+[data-testid="stHeader"] { background: transparent; }
+#MainMenu, footer { visibility: hidden; }
+.block-container { max-width: 1080px; padding-top: 2.2rem; padding-bottom: 3rem; }
+[data-testid="stSidebar"] { background: var(--panel); border-right: 1px solid var(--line); }
+
+/* hero */
+.hero { display:flex; gap:2rem; align-items:center; justify-content:space-between; flex-wrap:wrap;
+        padding:2rem 2.2rem; border:1px solid var(--line); border-radius:18px; background:var(--panel); margin-bottom:1.6rem; }
+.hero-copy { flex:1 1 380px; max-width:620px; }
+.hero-title { font-family:'Bricolage Grotesque', system-ui, sans-serif; font-weight:800;
+              font-size:clamp(2rem, 4.6vw, 3.3rem); line-height:1.04; letter-spacing:-.02em; margin:0 0 .85rem; }
+.hero-sub { color:var(--muted); font-size:1.05rem; line-height:1.55; margin:0 0 1.1rem; max-width:46ch; }
+.byline { font-size:.95rem; color:var(--muted); }
+.byline strong { color:var(--text); font-weight:600; }
+.li-pill { display:inline-block; margin-top:.9rem; padding:.4rem .95rem; border:1px solid var(--signal); border-radius:999px;
+           color:var(--signal) !important; font-weight:600; font-size:.9rem; text-decoration:none !important; transition:background .15s, color .15s; }
+.li-pill:hover { background:var(--signal); color:var(--on-signal) !important; }
+.li-pill:focus-visible, .brand-link:focus-visible, .footer a:focus-visible { outline:2px solid var(--signal); outline-offset:2px; }
+.brand-link { color:var(--signal) !important; font-size:.8rem; text-decoration:none !important; }
+.brand-link:hover { text-decoration:underline !important; }
+.footer a { color:var(--signal) !important; text-decoration:none !important; }
+.footer a:hover { text-decoration:underline !important; }
+.postmark { display:flex; align-items:center; gap:.5rem; flex:0 0 auto; }
+.stamp { width:140px; height:140px; border-radius:50%; border:3px solid var(--stamp); color:var(--stamp);
+         position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center;
+         transform:rotate(-10deg); animation:land .7s cubic-bezier(.2,.8,.2,1) both; }
+.stamp::before { content:""; position:absolute; inset:7px; border-radius:50%; border:1.5px solid var(--stamp); opacity:.75; }
+.stamp .mono { font-family:'Bricolage Grotesque', system-ui, sans-serif; font-weight:800; font-size:2rem; letter-spacing:.04em; line-height:1; }
+.stamp .nm { font-size:.64rem; font-weight:600; letter-spacing:.05em; margin-top:.4rem; }
+.waves { width:132px; height:42px; transform:rotate(-4deg); opacity:.9;
+         background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='14' viewBox='0 0 44 14'%3E%3Cpath d='M0 7 Q11 -1 22 7 T44 7' fill='none' stroke='%23E8962A' stroke-width='2'/%3E%3C/svg%3E") repeat; }
+@keyframes land { from { opacity:0; transform:rotate(-10deg) scale(1.3); } to { opacity:1; transform:rotate(-10deg) scale(1); } }
+@media (prefers-reduced-motion: reduce) { .stamp { animation:none; } }
+
+/* sidebar brand */
+.brand { display:flex; align-items:center; gap:.75rem; padding:.2rem 0 1.1rem; border-bottom:1px solid var(--line); margin-bottom:1rem; }
+.brand-mark { width:44px; height:44px; flex:0 0 44px; border-radius:50%; border:2px solid var(--stamp); color:var(--stamp);
+              display:grid; place-items:center; font-family:'Bricolage Grotesque', system-ui, sans-serif; font-weight:800; font-size:.85rem; transform:rotate(-10deg); }
+.brand-name { font-weight:600; line-height:1.2; }
+.brand-sub { color:var(--muted); font-size:.8rem; }
+
+/* sections, panels, chips */
+.section-title { font-family:'Bricolage Grotesque', system-ui, sans-serif; font-weight:600; font-size:1.3rem; margin:1.7rem 0 .6rem; }
+.section-title span { color:var(--muted); font-family:'DM Sans', system-ui, sans-serif; font-weight:500; font-size:.95rem; margin-left:.5rem; }
+.panel { border:1px solid var(--line); border-radius:14px; background:var(--panel); padding:1.4rem 1.6rem; }
+.flow { display:flex; gap:2rem; flex-wrap:wrap; }
+.col { flex:1 1 260px; }
+.col-title { font-weight:600; margin-bottom:.6rem; }
+.chip { display:inline-block; padding:.28rem .75rem; border:1px solid var(--line); border-radius:999px; font-size:.88rem; background:var(--panel-2); margin:0 .35rem .45rem 0; }
+.chip-new { background:var(--signal); color:var(--on-signal); border-color:var(--signal); font-weight:600; }
+.scroll { overflow-x:auto; margin-top:.9rem; }
+.sample { width:100%; border-collapse:collapse; font-size:.9rem; }
+.sample th { text-align:left; color:var(--muted); font-weight:500; border-bottom:1px solid var(--line); padding:.45rem .7rem; white-space:nowrap; }
+.sample td { padding:.45rem .7rem; border-bottom:1px solid var(--line); white-space:nowrap; }
+.sample td.new { color:var(--signal); font-weight:600; }
+.note { color:var(--muted); font-size:.92rem; line-height:1.5; margin-top:.9rem; max-width:70ch; }
+
+/* metrics */
+.metrics { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; margin:1rem 0 1.2rem; }
+.metric { border:1px solid var(--line); border-radius:14px; background:var(--panel); padding:1rem 1.2rem; }
+.metric.key { border-color:var(--signal); }
+.m-num { font-family:'Bricolage Grotesque', system-ui, sans-serif; font-weight:800; font-size:2.2rem; line-height:1.1; font-variant-numeric:tabular-nums; }
+.metric.key .m-num { color:var(--signal); }
+.m-label { color:var(--muted); font-size:.9rem; margin-top:.15rem; }
+
+/* widgets */
+.stButton > button, [data-testid="stDownloadButton"] > button { border-radius:10px; font-weight:600; padding:.55rem 1.3rem;
+        border:1px solid var(--line); background:var(--panel); color:var(--text); transition:border-color .15s, background .15s; }
+.stButton > button p, [data-testid="stDownloadButton"] > button p { color:inherit !important; }
+.stButton > button:hover, [data-testid="stDownloadButton"] > button:hover { border-color:var(--signal); color:var(--text); }
+.stButton > button[kind="primary"], button[data-testid="stBaseButton-primary"] { background:var(--signal); border-color:var(--signal); color:var(--on-signal); }
+.stButton > button[kind="primary"]:hover, button[data-testid="stBaseButton-primary"]:hover { filter:brightness(1.08); color:var(--on-signal); }
+.stButton > button:focus-visible, [data-testid="stDownloadButton"] > button:focus-visible { outline:2px solid var(--signal); outline-offset:2px; }
+[data-testid="stFileUploaderDropzone"] { border:1.5px dashed var(--line); border-radius:14px; background:var(--panel); }
+[data-testid="stFileUploaderDropzone"]:hover { border-color:var(--signal); }
+[data-testid="stDataFrame"] { border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+[data-testid="stExpander"] { border:1px solid var(--line); border-radius:12px; background:var(--panel); }
+.footer { margin-top:3rem; padding-top:1.1rem; border-top:1px solid var(--line); color:var(--muted); font-size:.88rem; text-align:center; }
+.footer strong { color:var(--text); font-weight:600; }
+"""
+
+
+def html(s: str):
+    """Render an HTML snippet. Lines are stripped and blank lines removed so Markdown can't break the block."""
+    s = "\n".join(line.strip() for line in s.splitlines() if line.strip())
+    st.markdown(s, unsafe_allow_html=True)
+
+
+def inject_css():
+    html(f"<style>{CSS}</style>")
+
+
+def sidebar_brand():
+    html(f"""
+    <div class="brand">
+      <div class="brand-mark">FMS</div>
+      <div><div class="brand-name">{BRAND}</div><div class="brand-sub">Email Permutation Generator</div>
+      <a class="brand-link" href="{LINKEDIN}" target="_blank" rel="noopener noreferrer">linkedin.com/in/felixsalve</a></div>
+    </div>
+    """)
+
+
+def hero():
+    html(f"""
+    <div class="hero">
+      <div class="hero-copy">
+        <div class="hero-title">Every likely inbox, for every lead.</div>
+        <div class="hero-sub">Upload your leads. Get back one row per possible address, each tied to the lead it belongs to.</div>
+        <div class="byline">Built by <strong>{BRAND}</strong></div>
+        <a class="li-pill" href="{LINKEDIN}" target="_blank" rel="noopener noreferrer">Connect on LinkedIn</a>
+      </div>
+      <div class="postmark">
+        <div class="stamp"><span class="mono">FMS</span><span class="nm">{BRAND}</span></div>
+        <div class="waves"></div>
+      </div>
+    </div>
+    """)
+
+
+def render_empty_state():
+    chips_in = "".join(f'<span class="chip">{c}</span>' for c in REQUIRED)
+    html(f"""
+    <div class="panel">
+      <div class="flow">
+        <div class="col"><div class="col-title">Your file needs</div>{chips_in}</div>
+        <div class="col"><div class="col-title">You get back</div>{chips_in}<span class="chip chip-new">New Email</span></div>
+      </div>
+      <div class="scroll"><table class="sample">
+        <tr><th>First Name</th><th>Last Name</th><th>Email</th><th>Domain</th><th>New Email</th></tr>
+        <tr><td>John</td><td>Smith</td><td>john.smith@acme.com</td><td>acme.com</td><td class="new">j.smith@acme.com</td></tr>
+        <tr><td>John</td><td>Smith</td><td>john.smith@acme.com</td><td>acme.com</td><td class="new">john-s@acme.com</td></tr>
+        <tr><td>John</td><td>Smith</td><td>john.smith@acme.com</td><td>acme.com</td><td class="new">jsmith@acme.com</td></tr>
+      </table></div>
+      <div class="note">Email stays on every row so you can match each New Email to its lead. John Smith alone returns 36 rows.</div>
+    </div>
+    """)
+
+
+def section_title(text: str, extra: str = ""):
+    tail = f"<span>{extra}</span>" if extra else ""
+    html(f'<div class="section-title">{text}{tail}</div>')
+
+
+def metric_cards(processed: int, generated: int, skipped: int):
+    html(f"""
+    <div class="metrics">
+      <div class="metric"><div class="m-num">{processed:,}</div><div class="m-label">Leads processed</div></div>
+      <div class="metric key"><div class="m-num">{generated:,}</div><div class="m-label">New emails generated</div></div>
+      <div class="metric"><div class="m-num">{skipped:,}</div><div class="m-label">Leads skipped</div></div>
+    </div>
+    """)
+
+
+def render_results(out: pd.DataFrame, skipped: pd.DataFrame, n_leads: int):
+    metric_cards(n_leads - len(skipped), len(out), len(skipped))
+
+    section_title("Results", f"first {min(len(out), 1000):,} of {len(out):,} rows" if len(out) > 1000 else f"{len(out):,} rows")
+    st.dataframe(out.head(1000))
+    if len(out) > 1000:
+        st.caption("The download contains every row.")
+
+    d1, d2, _ = st.columns([1, 1, 3])
+    d1.download_button(
+        "Download CSV",
+        out.to_csv(index=False).encode("utf-8-sig"),
+        file_name="email_permutations.csv",
+        mime="text/csv",
+    )
+    if len(out) <= 1_000_000:
+        buf = io.BytesIO()
+        out.to_excel(buf, index=False, engine="openpyxl")
+        d2.download_button(
+            "Download Excel",
+            buf.getvalue(),
+            file_name="email_permutations.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+    if len(skipped):
+        with st.expander(f"{len(skipped)} lead(s) skipped: missing name or domain, or no usable name after title cleanup"):
+            st.dataframe(skipped)
+
+
+def footer():
+    html(f'<div class="footer">&copy; 2026 <strong>{BRAND}</strong>. All rights reserved. <a href="{LINKEDIN}" target="_blank" rel="noopener noreferrer">LinkedIn</a></div>')
+
+
 # ----------------------------------------------------------------------------- UI
-st.title("✉️ Email Permutation Generator")
-st.caption(
-    "Upload leads with **First Name, Last Name, Email, Domain**. You get back the same columns plus "
-    "**New Email**: one row per permutation. The original Email stays on every row so you can match "
-    "each New Email back to its lead."
-)
+inject_css()
 
 with st.sidebar:
-    st.header("Settings")
+    sidebar_brand()
+    st.markdown("**Settings**")
     mode = st.radio(
         "Pattern mode",
         ["Comprehensive (suppression)", "Validation (stricter, fewer patterns)"],
-        help="Comprehensive = every pattern your email_utils can produce. "
+        help="Comprehensive = every pattern the engine can produce. "
              "Validation = realistic patterns only (min token length 2, budget 60).",
     )
     comprehensive = mode.startswith("Comprehensive")
@@ -620,9 +822,14 @@ with st.sidebar:
         help="Removes a permutation if it is identical to the Email already on that lead's row.",
     )
 
-file = st.file_uploader("Upload leads file", type=["csv", "xlsx", "xls"])
+hero()
 
-if file:
+file = st.file_uploader("Upload your leads (CSV or Excel)", type=["csv", "xlsx", "xls"])
+
+if not file:
+    st.session_state.pop("result", None)
+    render_empty_state()
+else:
     try:
         df = read_upload(file)
     except Exception as e:
@@ -634,8 +841,8 @@ if file:
         st.error(f"Missing required column(s): **{', '.join(missing)}**. Found: {', '.join(df.columns)}")
         st.stop()
 
-    st.subheader(f"Input preview ({len(df):,} leads)")
-    st.dataframe(df[[mapping[c] for c in REQUIRED]].head(10), use_container_width=True)
+    section_title("Preview", f"{len(df):,} leads")
+    st.dataframe(df[[mapping[c] for c in REQUIRED]].head(10))
 
     if st.button("Generate permutations", type="primary"):
         with st.spinner("Generating..."):
@@ -649,36 +856,7 @@ if file:
             )
         st.session_state["result"] = (out, skipped, len(df))
 
-if "result" in st.session_state:
-    out, skipped, n_leads = st.session_state["result"]
+    if "result" in st.session_state:
+        render_results(*st.session_state["result"])
 
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Leads processed", f"{n_leads - len(skipped):,}")
-    c2.metric("New emails generated", f"{len(out):,}")
-    c3.metric("Leads skipped", f"{len(skipped):,}")
-
-    st.subheader("Result preview")
-    st.dataframe(out.head(1000), use_container_width=True)
-    if len(out) > 1000:
-        st.caption(f"Showing first 1,000 of {len(out):,} rows. The download has everything.")
-
-    d1, d2 = st.columns(2)
-    d1.download_button(
-        "⬇️ Download CSV",
-        out.to_csv(index=False).encode("utf-8-sig"),
-        file_name="email_permutations.csv",
-        mime="text/csv",
-    )
-    if len(out) <= 1_000_000:
-        buf = io.BytesIO()
-        out.to_excel(buf, index=False, engine="openpyxl")
-        d2.download_button(
-            "⬇️ Download Excel",
-            buf.getvalue(),
-            file_name="email_permutations.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
-
-    if len(skipped):
-        with st.expander(f"{len(skipped)} lead(s) skipped (missing name/domain, or no valid name left after title cleanup)"):
-            st.dataframe(skipped, use_container_width=True)
+footer()
