@@ -605,7 +605,7 @@ CSS = """
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;600&display=swap');
 :root{
   --bg:#0B1220; --panel:#121B30; --panel-2:#1A2644; --line:#26335A;
-  --text:#E8EEF9; --muted:#93A3C4; --signal:#38BDF8; --on-signal:#04121F; --stamp:#E8962A;
+  --text:#E8EEF9; --muted:#93A3C4; --signal:#38BDF8; --on-signal:#04121F; 
 }
 @media (prefers-color-scheme: light){
   :root{ --bg:#F3F6FB; --panel:#FFFFFF; --panel-2:#EAF0FA; --line:#D6DFEE;
@@ -622,7 +622,7 @@ html, body, .stApp { background: var(--bg) !important; color: var(--text); }
 /* hero */
 .hero { display:flex; gap:2rem; align-items:center; justify-content:space-between; flex-wrap:wrap;
         padding:2rem 2.2rem; border:1px solid var(--line); border-radius:18px; background:var(--panel); margin-bottom:1.6rem; }
-.hero-copy { flex:1 1 380px; max-width:620px; }
+.hero-copy { flex:1 1 380px; max-width:680px; }
 .hero-title { font-family:'Bricolage Grotesque', system-ui, sans-serif; font-weight:800;
               font-size:clamp(2rem, 4.6vw, 3.3rem); line-height:1.04; letter-spacing:-.02em; margin:0 0 .85rem; }
 .hero-sub { color:var(--muted); font-size:1.05rem; line-height:1.55; margin:0 0 1.1rem; max-width:46ch; }
@@ -636,22 +636,9 @@ html, body, .stApp { background: var(--bg) !important; color: var(--text); }
 .brand-link:hover { text-decoration:underline !important; }
 .footer a { color:var(--signal) !important; text-decoration:none !important; }
 .footer a:hover { text-decoration:underline !important; }
-.postmark { display:flex; align-items:center; gap:.5rem; flex:0 0 auto; }
-.stamp { width:140px; height:140px; border-radius:50%; border:3px solid var(--stamp); color:var(--stamp);
-         position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center;
-         transform:rotate(-10deg); animation:land .7s cubic-bezier(.2,.8,.2,1) both; }
-.stamp::before { content:""; position:absolute; inset:7px; border-radius:50%; border:1.5px solid var(--stamp); opacity:.75; }
-.stamp .mono { font-family:'Bricolage Grotesque', system-ui, sans-serif; font-weight:800; font-size:2rem; letter-spacing:.04em; line-height:1; }
-.stamp .nm { font-size:.64rem; font-weight:600; letter-spacing:.05em; margin-top:.4rem; }
-.waves { width:132px; height:42px; transform:rotate(-4deg); opacity:.9;
-         background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='14' viewBox='0 0 44 14'%3E%3Cpath d='M0 7 Q11 -1 22 7 T44 7' fill='none' stroke='%23E8962A' stroke-width='2'/%3E%3C/svg%3E") repeat; }
-@keyframes land { from { opacity:0; transform:rotate(-10deg) scale(1.3); } to { opacity:1; transform:rotate(-10deg) scale(1); } }
-@media (prefers-reduced-motion: reduce) { .stamp { animation:none; } }
 
 /* sidebar brand */
 .brand { display:flex; align-items:center; gap:.75rem; padding:.2rem 0 1.1rem; border-bottom:1px solid var(--line); margin-bottom:1rem; }
-.brand-mark { width:44px; height:44px; flex:0 0 44px; border-radius:50%; border:2px solid var(--stamp); color:var(--stamp);
-              display:grid; place-items:center; font-family:'Bricolage Grotesque', system-ui, sans-serif; font-weight:800; font-size:.85rem; transform:rotate(-10deg); }
 .brand-name { font-weight:600; line-height:1.2; }
 .brand-sub { color:var(--muted); font-size:.8rem; }
 
@@ -709,7 +696,6 @@ def inject_css():
 def sidebar_brand():
     html(f"""
     <div class="brand">
-      <div class="brand-mark">FMS</div>
       <div><div class="brand-name">{BRAND}</div><div class="brand-sub">Email Permutation Generator</div>
       <a class="brand-link" href="{LINKEDIN}" target="_blank" rel="noopener noreferrer">linkedin.com/in/felixsalve</a></div>
     </div>
@@ -724,10 +710,6 @@ def hero():
         <div class="hero-sub">Upload your leads. Get back one row per possible address, each tied to the lead it belongs to.</div>
         <div class="byline">Built by <strong>{BRAND}</strong></div>
         <a class="li-pill" href="{LINKEDIN}" target="_blank" rel="noopener noreferrer">Connect on LinkedIn</a>
-      </div>
-      <div class="postmark">
-        <div class="stamp"><span class="mono">FMS</span><span class="nm">{BRAND}</span></div>
-        <div class="waves"></div>
       </div>
     </div>
     """)
